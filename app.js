@@ -35,13 +35,6 @@ async function takeScreenshots() {
 		fs.mkdirSync(directory, { recursive: true });
 	}
 
-	// helper function to wait for a specified period of time
-	const delay = (time) => {
-		return new Promise(function (resolve) {
-			setTimeout(resolve, time);
-		});
-	};
-
 	// count how many divs are clickable buttons (to open the chart tabs)
 	let i = 1;
 	let blocksLeftToCount = true;
@@ -68,9 +61,10 @@ async function takeScreenshots() {
 			continue;
 		}
 		await element.click(); // open the chart tab
-		//await page.waitForSelector('[data-testid="loginFormInputWithUserName"]');
+		await page.waitForSelector(
+			`#root > div > div > div:nth-child(${i})> div > div:nth-child(2)`
+		);
 		console.log("Performing operation, please wait...");
-		await delay(700); // wait for the operation to complete (else the chart tab might be empty)
 	}
 
 	// store an array of elements pointing towards the tabs containing charts, also store the tab names
