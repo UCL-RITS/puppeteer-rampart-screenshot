@@ -8,7 +8,6 @@ async function takeScreenshots() {
 	});
 	const page = await browser.newPage();
 	await page.setViewport({ width: 1980, height: 30000 }); // setting large height to account for case where there are many charts
-
 	const url = "http://localhost:3000"; // if localhost throws an error, try the local ip address instead
 	try {
 		await page.goto(url, {
@@ -60,9 +59,9 @@ async function takeScreenshots() {
 			// element will be null if it doesn't contain the button to open the chart tab
 			continue;
 		}
-		await element.click(); // open the chart tab
+		await element.click(); // open the chart tab and wait for the element to appear in the dom
 		await page.waitForSelector(
-			`#root > div > div > div:nth-child(${i})> div > div:nth-child(2)`
+			`#root > div > div > div:nth-child(${i}) > div > div:nth-child(2)`
 		);
 		console.log("Performing operation, please wait...");
 	}
@@ -88,7 +87,7 @@ async function takeScreenshots() {
 			chartTabName
 		);
 
-		// if there are duplicate tab names append a unique id to the end of the name
+		// if there are duplicate tab names, append a unique id to the end of the name
 		if (
 			chartTabGroupNames.includes(chartTabNameText) ||
 			fs.existsSync(`./${directory}/${chartTabNameText}.png`)
@@ -120,8 +119,14 @@ async function takeScreenshots() {
 		omitBackground: true,
 	});
 
-	// screenshot the entire page (append unique id to name if it already exists in the directory)
+	// detect the size of the page when all chart tabs are open so we can take a full page screenshot
+	// commented out setViewport as the chart tabs get closed when changing the viewport size (this is an issue with RAMPART not this app)
 	const rootElement = await page.$("#root");
+	const boundingBox = await rootElement.boundingBox();
+	const { width, height } = boundingBox;
+	// await page.setViewport({ width: width, height: height });
+
+	// screenshot the entire page (append unique id to name if it already exists in the directory)
 	await rootElement.screenshot({
 		path: fs.existsSync(`./${directory}/full_page.png`)
 			? `${directory}/full_page${uuidv4()}.png`
