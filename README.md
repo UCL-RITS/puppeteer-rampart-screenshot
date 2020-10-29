@@ -1,4 +1,4 @@
-This project allows users of the RAMPART project [https://github.com/artic-network/rampart](https://github.com/artic-network/rampart) to take automatic screenshots of chart outputs.
+This project allows users of the RAMPART project [https://github.com/artic-network/rampart](https://github.com/artic-network/rampart) to take automatic screenshots of RAMPART chart outputs.
 
 ---
 
@@ -8,7 +8,7 @@ You need to have Node.js installed on your local machine, this is required to ha
 
 https://nodejs.org/en/download/
 
-Once you have cloned this project run the following from the root project directory.
+Once Node is installed and you have cloned this project run the following from the root project directory.
 
 ```shell script
 npm install
@@ -20,21 +20,38 @@ This will install all of the project dependencies specified in package.json.
 
 ## Running the project
 
-In the root project directory run:
+First, make sure you have your RAMPART project running and that it is accessible from your localhost. The default location for active RAMPART projects is [http://localhost:3000](http://localhost:3000) and the application will assume this is the case unless further arguments are passed (see further below).
+
+Once RAMPART is running, navigate to the root of this project and run:
 
 ```shell script
 node app.js
 ```
 
-The app connects to the default location of running RAMPART projects: [http://localhost:3000](http://localhost:3000).
-If your RAMPART project runs from a different location you will need to specify this in the app.js file by modifying the url variable.
+The application will then automatically take screenshots of the charts in your active RAMPART session. Screenshots are saved as .png files in the project root under `/images`.
+
+---
+
+## Specifying a custom port
+
+If you are using a custom port to run your RAMPART project you can make this application aware of this by passing in an argument when running the app:
+
+```shell script
+node app.js http://localhost:5000
+```
+
+This can also be handy if the application throws an error when attempting to connect to localhost (a known issue on some devices). In such circumstances you can specify your local ip address and port, for example:
+
+```shell script
+node app.js http://192.168.1.13:3000
+```
+
+When no arguments are passed the application will assume your RAMPART project is running from http://localhost:3000
 
 ---
 
 ## Additional Project Notes
 
-The app uses puppeteer [https://github.com/puppeteer/puppeteer](https://github.com/puppeteer/puppeteer) to programatically interact with the browser. This app uses puppeteer to search for charts created by RAMPART and takes a screenshot of each chart.
-
-Chart screenshots are automatically saved as png files in the project root under './images'.
+This project uses puppeteer [https://github.com/puppeteer/puppeteer](https://github.com/puppeteer/puppeteer) to programatically interact with the browser.
 
 ---

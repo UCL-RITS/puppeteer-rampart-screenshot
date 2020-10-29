@@ -2,13 +2,17 @@ const puppeteer = require("puppeteer");
 const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
 
-async function takeScreenshots() {
+async function takeScreenshots(arguments) {
 	const browser = await puppeteer.launch({
 		headless: true,
 	});
 	const page = await browser.newPage();
 	await page.setViewport({ width: 1980, height: 30000 }); // setting large height to account for case where there are many charts
-	const url = "http://localhost:3000"; // if localhost throws an error, try the local ip address instead
+	const url =
+		arguments[0] !== null && arguments.length !== 0
+			? arguments[0]
+			: "http://localhost:3000";
+
 	try {
 		await page.goto(url, {
 			waitUntil: "networkidle2",
@@ -137,4 +141,5 @@ async function takeScreenshots() {
 	browser.close();
 }
 
-takeScreenshots();
+const arguments = process.argv.slice(2);
+takeScreenshots(arguments);
