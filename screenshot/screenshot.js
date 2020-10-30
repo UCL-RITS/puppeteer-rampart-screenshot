@@ -2,7 +2,7 @@ const puppeteer = require("puppeteer");
 const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
 
-async function takeScreenshots(url) {
+const takeScreenshots = async (url) => {
 	const browser = await puppeteer.launch({
 		headless: true,
 	});
@@ -135,6 +135,6 @@ async function takeScreenshots(url) {
 	});
 
 	browser.close();
-}
+};
 
 exports.takeScreenshots = takeScreenshots;
