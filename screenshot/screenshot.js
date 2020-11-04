@@ -29,7 +29,9 @@ const takeScreenshots = async (url) => {
 	let month = dateObject.getMonth() + 1;
 	let year = dateObject.getFullYear();
 
-	const directory = `./images/${year + "-" + month + "-" + date}`;
+	const directory = `./images/${
+		year + "-" + month + "-" + date + "-" + timeStamp
+	}`;
 	if (!fs.existsSync(directory)) {
 		fs.mkdirSync(directory, { recursive: true });
 	}
@@ -116,6 +118,15 @@ const takeScreenshots = async (url) => {
 		path: fs.existsSync(`./${directory}/header_charts.png`)
 			? `${directory}/header_charts_${uuidv4()}.png`
 			: `${directory}/header_charts.png`,
+		omitBackground: true,
+	});
+
+	// screenshot the top header
+	const topHeader = await page.$("#root > div > div > div");
+	await topHeader.screenshot({
+		path: fs.existsSync(`./${directory}/top_header.png`)
+			? `${directory}/top_header${uuidv4()}.png`
+			: `${directory}/top_header.png`,
 		omitBackground: true,
 	});
 
