@@ -13,12 +13,10 @@ if (!url) {
 const puppeteerConnect = async (url) => {
 	const browser = await puppeteer.launch({
 		headless: false,
-		//args: ["--window-size=1920,1080"],
 	});
 
 	const page = await browser.newPage();
 	await page.setViewport({ width: 1980, height: 50000 }); // setting large height to account for case where there are many charts
-	//await page._client.send("Emulation.clearDeviceMetricsOverride");
 
 	try {
 		await page.goto(url, {

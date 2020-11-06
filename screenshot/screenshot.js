@@ -115,7 +115,6 @@ const takeScreenshots = async (page) => {
 	const rootElement = await page.$("#root");
 	const boundingBox = await rootElement.boundingBox();
 	const { width, height } = boundingBox;
-	const viewport = page.viewport();
 
 	// await page.setViewport({ width: width, height: height });
 	if (height > page.viewport().height) {
