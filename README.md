@@ -28,7 +28,9 @@ Once RAMPART is running, navigate to the root of this project and run:
 node app.js
 ```
 
-The application will then automatically take screenshots of the charts in your active RAMPART session. Screenshots are saved as .png files in the project root under `/images`.
+The application will then automatically take screenshots of the charts in your active RAMPART session. Screenshots are saved as .png files in the project root under `/images`. Depending on how many charts you have in your project, it may take some time to finish taking all of the screenshots.
+
+Once the program has started, puppeteer will open a temporary Chrome window to start taking screenshots. The window will automatically close again when the program has finished.
 
 ---
 

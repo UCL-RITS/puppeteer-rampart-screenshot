@@ -1,27 +1,7 @@
-const puppeteer = require("puppeteer");
 const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
 
-const takeScreenshots = async (url) => {
-	const browser = await puppeteer.launch({
-		headless: true,
-	});
-	const page = await browser.newPage();
-	await page.setViewport({ width: 1980, height: 30000 }); // setting large height to account for case where there are many charts
-
-	try {
-		await page.goto(url, {
-			waitUntil: "networkidle2",
-		});
-	} catch (err) {
-		console.log(
-			"Having trouple establishing a connection. If you are attempting to connect to localhost try entering the url as your local ip address"
-		);
-		console.log(err);
-		browser.close();
-		return;
-	}
-
+const takeScreenshots = async (page) => {
 	// get the current date in YYYY-MM-DD format (for creating directories)
 	let timeStamp = Date.now();
 	let dateObject = new Date(timeStamp);
@@ -135,7 +115,14 @@ const takeScreenshots = async (url) => {
 	const rootElement = await page.$("#root");
 	const boundingBox = await rootElement.boundingBox();
 	const { width, height } = boundingBox;
+	const viewport = page.viewport();
+
 	// await page.setViewport({ width: width, height: height });
+	if (height > page.viewport().height) {
+		console.log(
+			`Viewport too small to fit images on screen. You need to increase the viewport height in app.js line 20. Please set the height larger than ${height}`
+		);
+	}
 
 	// screenshot the entire page (append unique id to name if it already exists in the directory)
 	await rootElement.screenshot({
@@ -144,8 +131,6 @@ const takeScreenshots = async (url) => {
 			: `${directory}/full_page.png`,
 		omitBackground: true,
 	});
-
-	browser.close();
 };
 
 exports.takeScreenshots = takeScreenshots;
