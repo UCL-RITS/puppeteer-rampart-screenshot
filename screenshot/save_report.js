@@ -18,6 +18,17 @@ const saveReport = async (page) => {
 	await page.waitForSelector(
 		`#root > div > div > div.sc-fzqBZW.ksbfDg.open > div`
 	);
+
+	const tableData = await page.evaluate(() => {
+		const thead = Array.from(
+			document.querySelectorAll(
+				"#root > div > div > div.sc-fzqBZW.ksbfDg.open > div > div.sc-fzqNJr.hSLfNI > table:nth-child(2) > thead > tr > th"
+			)
+		);
+		return thead.map((th) => th.innerText);
+	});
+
+	console.log(tableData);
 };
 
 exports.saveReport = saveReport;

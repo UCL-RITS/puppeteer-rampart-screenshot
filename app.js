@@ -33,7 +33,7 @@ const puppeteerConnect = async (url) => {
 		return;
 	}
 
-	await screenshot.takeScreenshots(page);
+	// await screenshot.takeScreenshots(page);
 	await saveReport.saveReport(page);
 	console.log("All operations completed");
 
