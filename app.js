@@ -1,5 +1,6 @@
 const puppeteer = require("puppeteer");
 const screenshot = require("./screenshot/screenshot");
+const saveReport = require("./screenshot/save_report");
 
 // process arguments
 let url = process.argv[2];
@@ -31,7 +32,9 @@ const puppeteerConnect = async (url) => {
 		return;
 	}
 
-	await screenshot.takeScreenshots(page);
+	await saveReport.saveReport(page);
+	//await screenshot.takeScreenshots(page);
+	console.log("All operations completed");
 
 	browser.close();
 };
