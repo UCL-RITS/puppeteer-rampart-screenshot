@@ -14,6 +14,7 @@ if (!url) {
 const puppeteerConnect = async (url) => {
 	const browser = await puppeteer.launch({
 		headless: false,
+		//slowMo: 250,
 	});
 
 	const page = await browser.newPage();
@@ -32,8 +33,8 @@ const puppeteerConnect = async (url) => {
 		return;
 	}
 
+	await screenshot.takeScreenshots(page);
 	await saveReport.saveReport(page);
-	//await screenshot.takeScreenshots(page);
 	console.log("All operations completed");
 
 	browser.close();
