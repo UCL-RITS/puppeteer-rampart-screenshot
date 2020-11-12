@@ -14,8 +14,8 @@ if (!url) {
 
 const puppeteerConnect = async (url) => {
 	const browser = await puppeteer.launch({
-		headless: false,
-		//slowMo: 250,
+		// headless: false,
+		// slowMo: 250,
 	});
 
 	const page = await browser.newPage();
@@ -48,8 +48,8 @@ const puppeteerConnect = async (url) => {
 		fs.mkdirSync(directory, { recursive: true });
 	}
 
-	// await screenshot.takeScreenshots(page, directory);
-	await saveReport.saveReport(page, directory);
+	await screenshot.takeScreenshots(page, directory);
+	// await saveReport.saveReport(page, directory);
 	console.log("All operations completed");
 
 	browser.close();

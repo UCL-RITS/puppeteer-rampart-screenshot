@@ -31,7 +31,17 @@ const takeScreenshots = async (page, directory) => {
 		await page.waitForSelector(
 			`#root > div > div > div:nth-child(${i}) > div > div:nth-child(2)`
 		);
-		console.log("Opening chart tab, please wait...");
+
+		// remove this repetition
+		const chartTabName = await page.$(
+			`#root > div > div > div:nth-child(${i}) > div > div.infoRow > div:nth-child(1) > span`
+		);
+		let chartTabNameText = await page.evaluate(
+			(element) => element.innerHTML,
+			chartTabName
+		);
+
+		console.log(`Opening chart tab: ${chartTabNameText}, please wait...`);
 	}
 
 	// store an array of elements pointing towards the tabs containing charts, also store the tab names
@@ -69,7 +79,7 @@ const takeScreenshots = async (page, directory) => {
 
 	// screenshot each tab containing charts
 	for (let i = 0; i < chartTabGroupElements.length; i++) {
-		console.log("Taking screenshot, please wait...");
+		console.log(`Taking screenshot: ${chartTabGroupNames[i]}, please wait...`);
 		const chartTab = await page.$(chartTabGroupElements[i]);
 		await chartTab.screenshot({
 			path: `${directory}/${chartTabGroupNames[i]}.png`,
