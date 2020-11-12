@@ -1,8 +1,9 @@
+const { table } = require("console");
 const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 
-const saveReport = async (page) => {
+const saveReport = async (page, directory) => {
 	const reportButtonElement = await page.$(
 		`#root > div > div > div.sc-AxirZ.aHDei > div.buttons > button`
 	);
@@ -27,41 +28,64 @@ const saveReport = async (page) => {
 		);
 		return thead.map((th) => th.innerText);
 	});
+
+	// format header data to be inserted into csv
+	const csvHeaders = tableHeadData.map((header, index) => {
+		return {
+			id: index,
+			title: header,
+		};
+	});
 	console.log(tableHeadData);
+	console.log(csvHeaders);
 
 	// get the rows from the first table
 	const tableRowData = await page.evaluate(() => {
 		const tbody = Array.from(
 			document.querySelectorAll(
-				"#root > div > div > div.sc-fzqBZW.ksbfDg.open > div > div.sc-fzqNJr.hSLfNI > table:nth-child(2) > tbody > tr > th"
+				"#root > div > div > div.sc-fzqBZW.ksbfDg.open > div > div.sc-fzqNJr.hSLfNI > table:nth-child(2) > tbody > tr"
 			)
 		);
 		return tbody.map((tr) => tr.innerText);
 	});
-	console.log(tableRowData);
+	//console.log(tableRowData);
 
-	// write data to csv (currently experimenting)
+	// extract content from each table row
+	const parsedRowData = [];
+	tableRowData.forEach((element) => {
+		const splitRow = element.split("\t");
+		parsedRowData.push(splitRow);
+	});
+	console.log(parsedRowData);
+
+	const csvRows = [];
+	parsedRowData.map((row) => {
+		let obj = {};
+		row.map((inner, index) => {
+			obj[index] = inner;
+		});
+		csvRows.push(obj);
+	});
+	console.log(csvRows);
+
+	// write data to csv
 	const csvWriter = createCsvWriter({
-		path: "file.csv",
-		header: [
-			{ id: "1", title: tableHeadData[0] },
-			{ id: "2", title: tableHeadData[1] },
-			{ id: "3", title: tableHeadData[2] },
-			{ id: "4", title: tableHeadData[3] },
-			{ id: "5", title: tableHeadData[4] },
-			{ id: "6", title: tableHeadData[5] },
-		],
+		path: `${directory}/report.csv`,
+		header: csvHeaders,
 	});
 
-	const records = [
-		{ 1: "test1", 2: "test2", 3: "test3", 4: "test4", 5: "test5", 6: "test6" },
-		{ 1: "test1", 2: "test2", 3: "test3", 4: "test4", 5: "test5", 6: "test6" },
-	];
+	// const csvRows = [
+	// 	{ 1: "test1", 2: "test2", 3: "test3", 4: "test4", 5: "test5", 6: "test6" },
+	// 	{ 1: "test1", 2: "test2", 3: "test3", 4: "test4", 5: "test5", 6: "test6" },
+	// ];
 
-	csvWriter
-		.writeRecords(records) // returns a promise
+	await csvWriter
+		.writeRecords(csvRows) // returns a promise
 		.then(() => {
-			console.log("...Done");
+			console.log("saved report as .csv");
+		})
+		.catch((error) => {
+			console.error(error);
 		});
 };
 

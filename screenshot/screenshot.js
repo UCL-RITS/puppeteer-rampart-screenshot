@@ -1,21 +1,7 @@
 const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
 
-const takeScreenshots = async (page) => {
-	// get the current date in YYYY-MM-DD format (for creating directories)
-	let timeStamp = Date.now();
-	let dateObject = new Date(timeStamp);
-	let date = dateObject.getDate();
-	let month = dateObject.getMonth() + 1;
-	let year = dateObject.getFullYear();
-
-	const directory = `./images/${
-		year + "-" + month + "-" + date + "-" + timeStamp
-	}`;
-	if (!fs.existsSync(directory)) {
-		fs.mkdirSync(directory, { recursive: true });
-	}
-
+const takeScreenshots = async (page, directory) => {
 	// count how many divs are clickable buttons (to open the chart tabs)
 	let i = 1;
 	let blocksLeftToCount = true;

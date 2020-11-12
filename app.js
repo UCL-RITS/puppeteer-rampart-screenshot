@@ -1,3 +1,4 @@
+const fs = require("fs");
 const puppeteer = require("puppeteer");
 const screenshot = require("./screenshot/screenshot");
 const saveReport = require("./screenshot/save_report");
@@ -33,8 +34,22 @@ const puppeteerConnect = async (url) => {
 		return;
 	}
 
-	// await screenshot.takeScreenshots(page);
-	await saveReport.saveReport(page);
+	// get the current date in YYYY-MM-DD format (for creating directories)
+	let timeStamp = Date.now();
+	let dateObject = new Date(timeStamp);
+	let date = dateObject.getDate();
+	let month = dateObject.getMonth() + 1;
+	let year = dateObject.getFullYear();
+
+	const directory = `./outputs/${
+		year + "-" + month + "-" + date + "-" + timeStamp
+	}`;
+	if (!fs.existsSync(directory)) {
+		fs.mkdirSync(directory, { recursive: true });
+	}
+
+	// await screenshot.takeScreenshots(page, directory);
+	await saveReport.saveReport(page, directory);
 	console.log("All operations completed");
 
 	browser.close();
