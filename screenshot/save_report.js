@@ -3,7 +3,7 @@ const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 
-const saveReport = async (page, directory) => {
+const saveReport = async (page, directory, delay) => {
 	const reportButtonElement = await page.$(
 		`#root > div > div > div.sc-AxirZ.aHDei > div.buttons > button`
 	);

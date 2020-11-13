@@ -55,9 +55,25 @@ const puppeteerConnect = async (url) => {
 		fs.mkdirSync(directory, { recursive: true });
 	}
 
-	await screenshot.takeScreenshots(page, directory, delay);
-	// await saveReport.saveReport(page, directory);
-	console.log("All operations completed");
+	try {
+		await screenshot.takeScreenshots(page, directory, delay);
+	} catch (err) {
+		console.log(
+			"\x1b[36m%s\x1b[0m",
+			" \n Something went wrong taking screenshots. Printing error... \n"
+		);
+		console.log(err);
+	}
+
+	// try {
+	// 	await saveReport.saveReport(page, directory, delay);
+	// } catch (err) {
+	// 	console.log(
+	// 		"\x1b[36m%s\x1b[0m",
+	// 		"Something went wrong taking screenshots. Printing error... \n"
+	// 	);
+	// 	console.log(err);
+	// }
 
 	browser.close();
 };

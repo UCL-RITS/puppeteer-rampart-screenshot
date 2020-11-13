@@ -1,4 +1,4 @@
-This project allows users of the RAMPART project [https://github.com/artic-network/rampart](https://github.com/artic-network/rampart) to take automatic screenshots of RAMPART chart outputs.
+This application allows users of the RAMPART project [https://github.com/artic-network/rampart](https://github.com/artic-network/rampart) to take automatic screenshots of RAMPART chart outputs using puppeteer https://github.com/puppeteer/puppeteer](https://github.com/puppeteer/puppeteer).
 
 ---
 
@@ -28,9 +28,7 @@ Once RAMPART is running, navigate to the root of this project and run:
 node app.js
 ```
 
-The application will then automatically take screenshots of the charts in your active RAMPART session. Screenshots are saved as .png files in the project root under `/images`. Depending on how many charts you have in your project, it may take some time to finish taking all of the screenshots.
-
-Once the program has started, puppeteer will open a temporary Chrome window to start taking screenshots. The window will automatically close again when the program has finished.
+The application will then automatically take screenshots of the charts in your active RAMPART session. Screenshots are saved as .png files in the project root under `/outputs`. Depending on how many charts you have in your project, it may take some time to finish taking all of the screenshots. Any screenshots that fail (see below for possible errors) will have "-failed" appended to the filename.
 
 ---
 
@@ -52,26 +50,24 @@ When no arguments are passed the application will assume your RAMPART project is
 
 ---
 
-## Compatibility with Rampart version
-
-This application has been tested against Rampart version 1.1.0. This application relies on the structure of the Rampart page being constant, therefore future updates to Rampart may break this application.
-
----
-
 ## Timeout error
 
-When running the application, you may occasionally experience this error: "TimeoutError: waiting for selector "[selector]" failed". This could be related to a potential puppeteer bug: [https://github.com/puppeteer/puppeteer/issues/4072](https://github.com/puppeteer/puppeteer/issues/4072). This error can usually be resolved by running the application again.
+When running the application, you may occasionally experience this error: "TimeoutError: waiting for selector "[selector]" failed". This could be related to a potential puppeteer bug: [https://github.com/puppeteer/puppeteer/issues/4072](https://github.com/puppeteer/puppeteer/issues/4072).
+
+When this error occurs the application will try to continue taking screenshots of the remaining charts. At this point you may wish to quit the running process and start it again (this can fix the error) or leave it running to take the rest of the screenshots. If you leave the process running, note that the chart causing the error will not produce a successful screenshot so you will need to take the screenshot of that particular chart manually.
+
+All charts that fail to produce a successful screenshot will have "-failed" appened to the image name in the outputs folder (e.g. Mayinga-failed.png).
 
 ---
 
 ## Why does the application sometimes fail to screenshot every chart?
 
-When viewing your image outputs you might occasionally notice that the application skipped a screenshot, or just took a screenshot of the tab bar containing the chart (and not the chart itself). This may be related to the above mentioned error [https://github.com/puppeteer/puppeteer/issues/4072](https://github.com/puppeteer/puppeteer/issues/4072). If this happens, try running the application again or take a manual screenshot of the charts that were missed.
+When viewing your image outputs you might occasionally notice that the application did not take a screenshot of every chart, or just took a screenshot of the tab bar containing the chart (in which case the image name will have "-failed" appended). This is related to the above mentioned timeout error [https://github.com/puppeteer/puppeteer/issues/4072](https://github.com/puppeteer/puppeteer/issues/4072). If this happens, try running the application again or take a manual screenshot of the charts that were missed.
 
 ---
 
-## Additional Project Notes
+## Compatibility
 
-This project uses puppeteer [https://github.com/puppeteer/puppeteer](https://github.com/puppeteer/puppeteer) to programatically interact with the browser.
+All features have been tested against Rampart version 1.1.0. This application relies on the structure of the Rampart page being constant, therefore future updates to Rampart may cause errors.
 
 ---

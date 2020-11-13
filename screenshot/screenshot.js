@@ -1,3 +1,4 @@
+const { fail } = require("assert");
 const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
 
@@ -17,8 +18,10 @@ const takeScreenshots = async (page, directory, delay) => {
 	}
 	const foundElementsCount = i;
 
+	const failedScreenshots = [];
 	// open all of the tabs containing charts (necessary to take screenshots)
 	for (let i = 1; i < foundElementsCount + 1; i++) {
+		// get the element containing the button to open the chart tab
 		const element = await page.$(
 			`#root > div > div > div:nth-child(${i}) > div > div.infoRow > div:nth-child(1) > svg`
 		);
@@ -28,30 +31,7 @@ const takeScreenshots = async (page, directory, delay) => {
 			continue;
 		}
 
-		await element.click(); // open the chart tab and wait for the element to appear in the dom
-		console.log("tab button clicked");
-		await delay(700);
-		try {
-			const tabContent = await page.$(
-				`#root > div > div > div:nth-child(${i}) > div > div:nth-child(2)`
-			);
-			let parsedTabContent = await page.evaluate(
-				(element) => element.className,
-				tabContent
-			);
-			console.log("element exists, classname = " + parsedTabContent);
-		} catch (err) {
-			console.log("could not get tab content");
-			continue;
-		}
-
-		// console.log("waiting for selector");
-		// await page.waitForSelector(
-		// 	`#root > div > div > div:nth-child(${i}) > div > div:nth-child(2)`
-		// );
-		// console.log("successfully waited for content");
-
-		// remove this repetition
+		// get the name of the current chart tab
 		const chartTabName = await page.$(
 			`#root > div > div > div:nth-child(${i}) > div > div.infoRow > div:nth-child(1) > span`
 		);
@@ -60,8 +40,26 @@ const takeScreenshots = async (page, directory, delay) => {
 			chartTabName
 		);
 
+		await element.click(); // open the chart tab
+		console.log("chart tab button clicked");
+
+		try {
+			console.log("waiting for selector");
+			await page.waitForSelector(
+				`#root > div > div > div:nth-child(${i}) > div > div:nth-child(2)`
+			);
+		} catch (err) {
+			console.log(
+				`the application experienced a timeout waiting for tab ${chartTabNameText} to open. Moving on to next chart` +
+					"\n"
+			);
+			failedScreenshots.push(chartTabNameText);
+			continue;
+		}
+
 		console.log(
-			`Opening chart tab: ${chartTabNameText}, please wait...` + "\n"
+			`Successfully opened chart tab: ${chartTabNameText}, please wait...` +
+				"\n"
 		);
 	}
 
@@ -102,8 +100,13 @@ const takeScreenshots = async (page, directory, delay) => {
 	for (let i = 0; i < chartTabGroupElements.length; i++) {
 		console.log(`Taking screenshot: ${chartTabGroupNames[i]}, please wait...`);
 		const chartTab = await page.$(chartTabGroupElements[i]);
+
+		const appendToImageName = failedScreenshots.includes(chartTabGroupNames[i])
+			? "-failed"
+			: "";
+
 		await chartTab.screenshot({
-			path: `${directory}/${chartTabGroupNames[i]}.png`,
+			path: `${directory}/${chartTabGroupNames[i]}${appendToImageName}.png`,
 			omitBackground: true,
 		});
 	}
