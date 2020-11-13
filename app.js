@@ -34,6 +34,13 @@ const puppeteerConnect = async (url) => {
 		return;
 	}
 
+	// helper function to wait for a specified period of time
+	const delay = (time) => {
+		return new Promise(function (resolve) {
+			setTimeout(resolve, time);
+		});
+	};
+
 	// get the current date in YYYY-MM-DD format (for creating directories)
 	let timeStamp = Date.now();
 	let dateObject = new Date(timeStamp);
@@ -48,7 +55,7 @@ const puppeteerConnect = async (url) => {
 		fs.mkdirSync(directory, { recursive: true });
 	}
 
-	await screenshot.takeScreenshots(page, directory);
+	await screenshot.takeScreenshots(page, directory, delay);
 	// await saveReport.saveReport(page, directory);
 	console.log("All operations completed");
 

@@ -1,7 +1,7 @@
 const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
 
-const takeScreenshots = async (page, directory) => {
+const takeScreenshots = async (page, directory, delay) => {
 	// count how many divs are clickable buttons (to open the chart tabs)
 	let i = 1;
 	let blocksLeftToCount = true;
@@ -27,10 +27,29 @@ const takeScreenshots = async (page, directory) => {
 			// element will be null if it doesn't contain the button to open the chart tab
 			continue;
 		}
+
 		await element.click(); // open the chart tab and wait for the element to appear in the dom
-		await page.waitForSelector(
-			`#root > div > div > div:nth-child(${i}) > div > div:nth-child(2)`
-		);
+		console.log("tab button clicked");
+		await delay(700);
+		try {
+			const tabContent = await page.$(
+				`#root > div > div > div:nth-child(${i}) > div > div:nth-child(2)`
+			);
+			let parsedTabContent = await page.evaluate(
+				(element) => element.className,
+				tabContent
+			);
+			console.log("element exists, classname = " + parsedTabContent);
+		} catch (err) {
+			console.log("could not get tab content");
+			continue;
+		}
+
+		// console.log("waiting for selector");
+		// await page.waitForSelector(
+		// 	`#root > div > div > div:nth-child(${i}) > div > div:nth-child(2)`
+		// );
+		// console.log("successfully waited for content");
 
 		// remove this repetition
 		const chartTabName = await page.$(
@@ -41,7 +60,9 @@ const takeScreenshots = async (page, directory) => {
 			chartTabName
 		);
 
-		console.log(`Opening chart tab: ${chartTabNameText}, please wait...`);
+		console.log(
+			`Opening chart tab: ${chartTabNameText}, please wait...` + "\n"
+		);
 	}
 
 	// store an array of elements pointing towards the tabs containing charts, also store the tab names

@@ -52,6 +52,24 @@ When no arguments are passed the application will assume your RAMPART project is
 
 ---
 
+## Compatibility with Rampart version
+
+This application has been tested against Rampart version 1.1.0. This application relies on the structure of the Rampart page being constant, therefore future updates to Rampart may break this application.
+
+---
+
+## Timeout error
+
+When running the application, you may occasionally experience this error: "TimeoutError: waiting for selector "[selector]" failed". This could be related to a potential puppeteer bug: [https://github.com/puppeteer/puppeteer/issues/4072](https://github.com/puppeteer/puppeteer/issues/4072). This error can usually be resolved by running the application again.
+
+---
+
+## Why does the application sometimes fail to screenshot every chart?
+
+When viewing your image outputs you might occasionally notice that the application skipped a screenshot, or just took a screenshot of the tab bar containing the chart (and not the chart itself). This may be related to the above mentioned error [https://github.com/puppeteer/puppeteer/issues/4072](https://github.com/puppeteer/puppeteer/issues/4072). If this happens, try running the application again or take a manual screenshot of the charts that were missed.
+
+---
+
 ## Additional Project Notes
 
 This project uses puppeteer [https://github.com/puppeteer/puppeteer](https://github.com/puppeteer/puppeteer) to programatically interact with the browser.
