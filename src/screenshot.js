@@ -1,4 +1,3 @@
-const { fail } = require("assert");
 const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
 
@@ -41,16 +40,16 @@ const takeScreenshots = async (page, directory, delay) => {
 		);
 
 		await element.click(); // open the chart tab
-		console.log("chart tab button clicked");
+		console.log(`chart tab button ${chartTabNameText} clicked`);
 
 		try {
-			console.log("waiting for selector");
+			console.log("waiting for element to appear in the dom, please wait...");
 			await page.waitForSelector(
 				`#root > div > div > div:nth-child(${i}) > div > div:nth-child(2)`
 			);
 		} catch (err) {
 			console.log(
-				`the application experienced a timeout waiting for tab ${chartTabNameText} to open. Moving on to next chart` +
+				`timeout waiting for tab ${chartTabNameText} to open. Moving on to next chart...` +
 					"\n"
 			);
 			failedScreenshots.push(chartTabNameText);

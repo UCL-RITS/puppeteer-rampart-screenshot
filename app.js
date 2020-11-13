@@ -1,13 +1,13 @@
 const fs = require("fs");
 const puppeteer = require("puppeteer");
-const screenshot = require("./screenshot/screenshot");
-const saveReport = require("./screenshot/save_report");
+const screenshot = require("./src/screenshot");
+const saveReport = require("./src/save_report");
 
 // process arguments
 let url = process.argv[2];
 if (!url) {
 	console.log(
-		"No arguments passed to specify url. Defaulting to http://localhost:3000"
+		"No arguments passed to specify url. Defaulting to http://localhost:3000 \n"
 	);
 	url = "http://localhost:3000";
 }
@@ -65,17 +65,17 @@ const puppeteerConnect = async (url) => {
 		console.log(err);
 	}
 
-	// try {
-	// 	await saveReport.saveReport(page, directory, delay);
-	// } catch (err) {
-	// 	console.log(
-	// 		"\x1b[36m%s\x1b[0m",
-	// 		"Something went wrong taking screenshots. Printing error... \n"
-	// 	);
-	// 	console.log(err);
-	// }
+	try {
+		// await saveReport.saveReport(page, directory, delay);
+	} catch (err) {
+		console.log(
+			"\x1b[36m%s\x1b[0m",
+			"Something went wrong taking screenshots. Printing error... \n"
+		);
+		console.log(err);
+	}
 
-	browser.close();
+	//browser.close();
 };
 
 puppeteerConnect(url);
