@@ -4,7 +4,7 @@ This application allows users of the RAMPART project [https://github.com/artic-n
 
 ## Requirements
 
-You need to have Node.js installed on your local machine, this is required to handle npm packages.
+You need to have Node.js (at least version 10.18.1) installed on your local machine, this is required to handle npm packages. Note that RAMPART also requires Node.js to be at least version 10 or above so you should be able to rely on the version of Node.js that is already running your rampart project.
 
 https://nodejs.org/en/download/
 
@@ -54,15 +54,15 @@ When no arguments are passed the application will assume your RAMPART project is
 
 When running the application, you may occasionally experience this error: "TimeoutError: waiting for selector "[selector]" failed". This could be related to a potential puppeteer bug: [https://github.com/puppeteer/puppeteer/issues/4072](https://github.com/puppeteer/puppeteer/issues/4072).
 
-When this error occurs the application will try to continue taking screenshots of the remaining charts. At this point you may wish to quit the running process and start it again (this can fix the error) or leave it running to take the rest of the screenshots. If you leave the process running, note that the chart causing the error will not produce a successful screenshot so you will need to take the screenshot of that particular chart manually.
-
-All charts that fail to produce a successful screenshot will have "-failed" appened to the image name in the outputs folder (e.g. Mayinga-failed.png).
+When this error occurs the application will try to continue taking screenshots of the remaining charts so you will need to take the screenshot of the failed chart manually.
 
 ---
 
 ## Why does the application sometimes fail to screenshot every chart?
 
 When viewing your image outputs you might occasionally notice that the application did not take a screenshot of every chart, or just took a screenshot of the tab bar containing the chart (in which case the image name will have "-failed" appended). This is related to the above mentioned timeout error [https://github.com/puppeteer/puppeteer/issues/4072](https://github.com/puppeteer/puppeteer/issues/4072). If this happens, try running the application again or take a manual screenshot of the charts that were missed.
+
+Any charts that fail to produce a successful screenshot will have "-failed" appened to the image name in the outputs folder (e.g. Mayinga-failed.png) and you will therefore need to take a screenshot of this image manually.
 
 ---
 

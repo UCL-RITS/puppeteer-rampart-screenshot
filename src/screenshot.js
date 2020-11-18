@@ -36,8 +36,6 @@ const takeScreenshots = async (page, directory) => {
 			// a recursive function that will attempt to open the chart tab 2 times if it fails for some reason
 			let attempts = 0;
 			const openTabAndWait = async () => {
-				console.log(attempts);
-
 				// get the button to open the tab again (else the node detaches on the second attempt)
 				const element = await page.$(tabButtonRef);
 
@@ -51,20 +49,18 @@ const takeScreenshots = async (page, directory) => {
 					await page.waitForSelector(
 						`#root > div > div > div:nth-child(${i}) > div > div:nth-child(2)`
 					);
-					console.log(
-						`Successfully opened chart tab: ${chartTabNameText}, please wait...` +
-							"\n"
-					);
+					console.log(`Successfully opened chart tab ${chartTabNameText} \n`);
 					return true;
 				} catch (err) {
 					attempts++;
 					if (attempts <= 1) {
-						console.log(`trying again to open tab ${chartTabNameText}`);
+						console.log(
+							`experienced a timeout. Trying to open tab ${chartTabNameText} again`
+						);
 						await openTabAndWait();
 					} else {
 						console.log(
-							`timeout waiting for tab ${chartTabNameText} to open. Moving on to next chart...` +
-								"\n"
+							`timeout waiting for tab ${chartTabNameText} to open. Moving on to next chart... \n`
 						);
 						failedScreenshots.push(chartTabNameText);
 						return false;
