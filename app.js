@@ -21,6 +21,14 @@ const puppeteerConnect = async (url) => {
 	const page = await browser.newPage();
 	await page.setViewport({ width: 1980, height: 50000 }); // setting large height to account for case where there are many charts
 
+	// minimise the window if running with headless mode as false
+	// const session = await page.target().createCDPSession();
+	// const { windowId } = await session.send("Browser.getWindowForTarget");
+	// await session.send("Browser.setWindowBounds", {
+	// 	windowId,
+	// 	bounds: { windowState: "minimized" },
+	// });
+
 	try {
 		await page.goto(url, {
 			waitUntil: "networkidle2",
@@ -70,12 +78,12 @@ const puppeteerConnect = async (url) => {
 	} catch (err) {
 		console.log(
 			"\x1b[36m%s\x1b[0m",
-			"Something went wrong taking screenshots. Printing error... \n"
+			"Something went wrong saving the chart. Printing error... \n"
 		);
 		console.log(err);
 	}
 
-	//browser.close();
+	browser.close();
 };
 
 puppeteerConnect(url);

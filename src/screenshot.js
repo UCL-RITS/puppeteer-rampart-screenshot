@@ -20,10 +20,11 @@ const takeScreenshots = async (page, directory, delay) => {
 	const failedScreenshots = [];
 	// open all of the tabs containing charts (necessary to take screenshots)
 	for (let i = 1; i < foundElementsCount + 1; i++) {
-		// get the element containing the button to open the chart tab
-		const element = await page.$(
-			`#root > div > div > div:nth-child(${i}) > div > div.infoRow > div:nth-child(1) > svg`
-		);
+		// a reference to the dom element containing the button to open chart tabs
+		const tabButtonRef = `#root > div > div > div:nth-child(${i}) > div > div.infoRow > div:nth-child(1) > svg`;
+
+		// give puppeteer access to the element containing the button to open the chart tab
+		const element = await page.$(tabButtonRef);
 
 		if (element === null) {
 			// element will be null if it doesn't contain the button to open the chart tab
@@ -39,27 +40,49 @@ const takeScreenshots = async (page, directory, delay) => {
 			chartTabName
 		);
 
-		await element.click(); // open the chart tab
-		console.log(`chart tab button ${chartTabNameText} clicked`);
+		// a recursive function that will attempt to open the chart tab 2 times if it fails for some reason
+		let attempts = 0;
+		const openAndWait = async () => {
+			console.log(attempts);
 
-		try {
-			console.log("waiting for element to appear in the dom, please wait...");
-			await page.waitForSelector(
-				`#root > div > div > div:nth-child(${i}) > div > div:nth-child(2)`
-			);
-		} catch (err) {
-			console.log(
-				`timeout waiting for tab ${chartTabNameText} to open. Moving on to next chart...` +
-					"\n"
-			);
-			failedScreenshots.push(chartTabNameText);
+			// get the button to open the tab again (else the node detaches on the second attempt)
+			const element = await page.$(tabButtonRef);
+
+			await element.click(); // open the chart tab
+			console.log(`chart tab button ${chartTabNameText} clicked`);
+
+			try {
+				console.log("waiting for element to appear in the dom, please wait...");
+				await page.waitForSelector(
+					`#root > div > div > div:nth-child(${i}) > div > div:nth-child(2)`
+				);
+				console.log(
+					`Successfully opened chart tab: ${chartTabNameText}, please wait...` +
+						"\n"
+				);
+				return "success";
+			} catch (err) {
+				attempts++;
+				if (attempts <= 1) {
+					console.log(`trying again to open tab ${chartTabNameText}`);
+					await openAndWait();
+				} else {
+					console.log(
+						`timeout waiting for tab ${chartTabNameText} to open. Moving on to next chart...` +
+							"\n"
+					);
+					failedScreenshots.push(chartTabNameText);
+					return "failed to open tab";
+				}
+			}
+		};
+
+		const res = await openAndWait();
+		console.log(res);
+
+		if (res === "failed to open tab") {
 			continue;
 		}
-
-		console.log(
-			`Successfully opened chart tab: ${chartTabNameText}, please wait...` +
-				"\n"
-		);
 	}
 
 	// store an array of elements pointing towards the tabs containing charts, also store the tab names
