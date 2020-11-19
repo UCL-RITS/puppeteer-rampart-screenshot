@@ -9,6 +9,7 @@ const takeScreenshots = async (page, directory) => {
 			(element) => element.innerHTML,
 			elementTextRef
 		);
+
 		return text;
 	};
 

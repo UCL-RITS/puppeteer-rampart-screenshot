@@ -24,6 +24,14 @@ const saveReport = async (page, directory, delay) => {
 		return tableData.length;
 	};
 
+	const getTableName = async (tableRef) => {
+		const tableName = await page.$eval(
+			`${tableRef} > caption`,
+			(el) => el.innerText
+		);
+		return tableName;
+	};
+
 	const getTableHeaderData = async (tableRef) => {
 		const tableHeadData = await page.evaluate((tableRef) => {
 			const thead = Array.from(
@@ -32,6 +40,12 @@ const saveReport = async (page, directory, delay) => {
 			return thead.map((th) => th.innerText);
 		}, tableRef);
 
+		// an alternative method to above (more abstract and less clear what it does)
+		// const tableHeadData = await page.$$eval(
+		// 	`${tableRef} > thead > tr > th`,
+		// 	(theads) => theads.map((th) => th.innerText)
+		// );
+
 		// format header data to be inserted into csv
 		const csvHeaders = tableHeadData.map((header, index) => {
 			return {
@@ -39,9 +53,6 @@ const saveReport = async (page, directory, delay) => {
 				title: header,
 			};
 		});
-		// console.log(tableHeadData);
-		// console.log(csvHeaders);
-
 		return csvHeaders;
 	};
 
@@ -56,10 +67,10 @@ const saveReport = async (page, directory, delay) => {
 		return tableRowData;
 	};
 
-	const parseTableData = async (tableData) => {
+	const parseTableData = async (tableRowData) => {
 		// extract content from each table row
 		const parsedRowData = [];
-		tableData.forEach((element) => {
+		tableRowData.forEach((element) => {
 			const splitRow = element.split("\t");
 			parsedRowData.push(splitRow);
 		});
@@ -78,17 +89,17 @@ const saveReport = async (page, directory, delay) => {
 		return csvRows;
 	};
 
-	const saveTableToCsv = async (csvHeaders, csvRows, index) => {
+	const saveTableToCsv = async (tableName, csvHeaders, csvRows, index) => {
 		// write data to csv
 		const csvWriter = createCsvWriter({
-			path: `${directory}/report_${index}.csv`,
+			path: `${directory}/${tableName}.csv`,
 			header: csvHeaders,
 		});
 
 		await csvWriter
 			.writeRecords(csvRows)
 			.then(() => {
-				console.log(`saved report_${index} as .csv`);
+				console.log(`saved ${tableName} as .csv`);
 			})
 			.catch((error) => {
 				console.log(
@@ -106,10 +117,11 @@ const saveReport = async (page, directory, delay) => {
 	for (let i = 1; i < tableCount + 1; i++) {
 		const tableRef = `#root > div > div > .open > div > div:nth-child(2) > table:nth-of-type(${i})`;
 
+		const tableName = await getTableName(tableRef);
 		const csvHeaders = await getTableHeaderData(tableRef);
 		const tableRowData = await getTableRowData(tableRef);
 		const csvRows = await parseTableData(tableRowData);
-		await saveTableToCsv(csvHeaders, csvRows, i);
+		await saveTableToCsv(tableName, csvHeaders, csvRows, i);
 	}
 };
 

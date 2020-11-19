@@ -20,6 +20,7 @@ const puppeteerConnect = async (url) => {
 
 	const page = await browser.newPage();
 	await page.setViewport({ width: 1980, height: 50000 }); // setting large height to account for case where there are many charts
+	page.setDefaultTimeout(10000);
 
 	// minimise the window if running with headless mode as false
 	// const session = await page.target().createCDPSession();
@@ -65,7 +66,7 @@ const puppeteerConnect = async (url) => {
 
 	// take screenshots of charts
 	try {
-		// await screenshot.takeScreenshots(page, directory, delay);
+		await screenshot.takeScreenshots(page, directory, delay);
 	} catch (err) {
 		console.log(
 			"\x1b[36m%s\x1b[0m",
