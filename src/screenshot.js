@@ -161,27 +161,42 @@ const takeScreenshots = async (page, directory) => {
 		});
 	};
 
-	const takeFullpageScreenshot = async () => {
-		// detect the size of the page when all chart tabs are open so we can take a full page screenshot
-		// commented out setViewport as the chart tabs get closed when changing the viewport size (this is an issue with RAMPART not this app)
-		const rootElement = await page.$("#root");
-		const boundingBox = await rootElement.boundingBox();
-		const { width, height } = boundingBox;
-
-		// await page.setViewport({ width: width, height: height });
-		if (height > page.viewport().height) {
+	const takeFullpageScreenshot = async (viewport) => {
+		if (viewport.height > page.viewport().height) {
 			console.log(
 				`Viewport too small to fit images on screen. You need to increase the viewport height in app.js line 20. Please set the height larger than ${height}`
 			);
 		}
 
+		// await page.screenshot({
+		// 	path: fs.existsSync(`./${directory}/full_page.png`)
+		// 		? `${directory}/full_page${uuidv4()}.png`
+		// 		: `${directory}/full_page.png`,
+		// 	fullPage: true,
+		// });
+
 		// screenshot the entire page (append unique id to name if it already exists in the directory)
+		const rootElement = await page.$("#root");
 		await rootElement.screenshot({
 			path: fs.existsSync(`./${directory}/full_page.png`)
-				? `${directory}/full_page${uuidv4()}.png`
+				? `${directory}/full_page_${uuidv4()}.png`
 				: `${directory}/full_page.png`,
 			omitBackground: true,
 		});
+	};
+
+	const getViewport = async () => {
+		// detect the size of the page when all chart tabs are open so we can take a full page screenshot
+		const rootElement = await page.$("#root");
+		const boundingBox = await rootElement.boundingBox();
+		const { width, height } = boundingBox;
+		return boundingBox;
+	};
+
+	const setViewport = async (viewport) => {
+		console.log(viewport);
+		// commented out setViewport as the chart tabs get closed when changing the viewport size (this is an issue with RAMPART not this app)
+		//await page.setViewport({ width: viewport.width, height: viewport.height });
 	};
 
 	const chartTabGroupElements = []; // stores the chart tab dom elements
@@ -197,7 +212,9 @@ const takeScreenshots = async (page, directory) => {
 		failedScreenshots
 	);
 	await takeHeaderScreenshot();
-	await takeFullpageScreenshot();
+	const viewport = await getViewport();
+	// await setViewport(viewport);
+	await takeFullpageScreenshot(viewport);
 };
 
 exports.takeScreenshots = takeScreenshots;

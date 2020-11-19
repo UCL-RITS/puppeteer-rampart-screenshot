@@ -63,6 +63,7 @@ const puppeteerConnect = async (url) => {
 		fs.mkdirSync(directory, { recursive: true });
 	}
 
+	// take screenshots of charts
 	try {
 		await screenshot.takeScreenshots(page, directory, delay);
 	} catch (err) {
@@ -73,6 +74,7 @@ const puppeteerConnect = async (url) => {
 		console.log(err);
 	}
 
+	// save the information in the 'reports' tab as a .csv
 	try {
 		// await saveReport.saveReport(page, directory, delay);
 	} catch (err) {

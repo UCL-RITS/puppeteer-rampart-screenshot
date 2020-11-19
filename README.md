@@ -50,6 +50,22 @@ When no arguments are passed the application will assume your RAMPART project is
 
 ---
 
+## Fullpage screenshot issues
+
+There is currently a known chromium bug that is affecting the behaviour of some fullpage screenshots, see here for more information [https://github.com/puppeteer/puppeteer/issues/1576](https://github.com/puppeteer/puppeteer/issues/1576). This seems to affect pages that have a large viewport height and causes the fullpage screenshot to duplicate content.
+
+If you are running into this issue there are currently two options: 1. set headless mode to false (app.js line 17); 2. take the fullpage screenshot manually.
+
+---
+
+## Why does the application sometimes fail to screenshot every chart?
+
+When viewing your image outputs you might occasionally notice that the application did not take a screenshot of every chart, or just took a screenshot of the tab bar containing the chart (in which case the image name will have "-failed" appended). This is related to the above mentioned timeout error [https://github.com/puppeteer/puppeteer/issues/4072](https://github.com/puppeteer/puppeteer/issues/4072). If this happens, try running the application again or take a manual screenshot of the charts that were missed.
+
+Any charts that fail to produce a successful screenshot will have "-failed" appened to the image name in the outputs folder (e.g. Mayinga-failed.png) and you will therefore need to take a screenshot of this image manually.
+
+---
+
 ## Timeout error
 
 When running the application, you may occasionally experience this error: "TimeoutError: waiting for selector "[selector]" failed". This could be related to a potential puppeteer bug: [https://github.com/puppeteer/puppeteer/issues/4072](https://github.com/puppeteer/puppeteer/issues/4072).
