@@ -25,16 +25,6 @@ const saveReport = async (page, directory, delay) => {
 	};
 
 	const getTableHeaderData = async (tableRef) => {
-		// get the headers from the first table
-		// const tableHeadData = await page.evaluate(() => {
-		// 	const thead = Array.from(
-		// 		document.querySelectorAll(
-		// 			"#root > div > div > div.sc-fzqBZW.ksbfDg.open > div > div.sc-fzqNJr.hSLfNI > table:nth-child(2) > thead > tr > th"
-		// 		)
-		// 	);
-		// 	return thead.map((th) => th.innerText);
-		// });
-
 		const tableHeadData = await page.evaluate((tableRef) => {
 			const thead = Array.from(
 				document.querySelectorAll(`${tableRef} > thead > tr > th`)
@@ -49,35 +39,31 @@ const saveReport = async (page, directory, delay) => {
 				title: header,
 			};
 		});
-		console.log(tableHeadData);
-		console.log(csvHeaders);
+		// console.log(tableHeadData);
+		// console.log(csvHeaders);
 
 		return csvHeaders;
 	};
 
-	const getTableRowData = async () => {
-		// get the rows from the first table
-		const tableRowData = await page.evaluate(() => {
+	const getTableRowData = async (tableRef) => {
+		const tableRowData = await page.evaluate((tableRef) => {
 			const tbody = Array.from(
-				document.querySelectorAll(
-					"#root > div > div > div.sc-fzqBZW.ksbfDg.open > div > div.sc-fzqNJr.hSLfNI > table:nth-child(2) > tbody > tr"
-				)
+				document.querySelectorAll(`${tableRef} > tbody > tr`)
 			);
 			return tbody.map((tr) => tr.innerText);
-		});
+		}, tableRef);
 
-		// console.log(tableRowData);
 		return tableRowData;
 	};
 
-	const parseTableData1 = async (tableData) => {
+	const parseTableData = async (tableData) => {
 		// extract content from each table row
 		const parsedRowData = [];
 		tableData.forEach((element) => {
 			const splitRow = element.split("\t");
 			parsedRowData.push(splitRow);
 		});
-		console.log(parsedRowData);
+		// console.log(parsedRowData);
 
 		const csvRows = [];
 		parsedRowData.map((row) => {
@@ -88,50 +74,43 @@ const saveReport = async (page, directory, delay) => {
 			csvRows.push(obj);
 		});
 
-		console.log(csvRows);
+		// console.log(csvRows);
 		return csvRows;
 	};
 
-	const saveTableToCsv = async (csvHeaders, csvRows) => {
+	const saveTableToCsv = async (csvHeaders, csvRows, index) => {
 		// write data to csv
 		const csvWriter = createCsvWriter({
-			path: `${directory}/report.csv`,
+			path: `${directory}/report_${index}.csv`,
 			header: csvHeaders,
 		});
-
-		// const csvRows = [
-		// 	{ 1: "test1", 2: "test2", 3: "test3", 4: "test4", 5: "test5", 6: "test6" },
-		// 	{ 1: "test1", 2: "test2", 3: "test3", 4: "test4", 5: "test5", 6: "test6" },
-		// ];
 
 		await csvWriter
 			.writeRecords(csvRows)
 			.then(() => {
-				console.log("saved report as .csv");
+				console.log(`saved report_${index} as .csv`);
 			})
 			.catch((error) => {
+				console.log(
+					`something went wrong trying to write report_${index} as .csv`
+				);
 				console.error(error);
 			});
 	};
 
+	// App flow starts here
 	await openReportTab();
 	const tableCount = await countTables();
 
+	// loop through each table and save the data as csv
 	for (let i = 1; i < tableCount + 1; i++) {
 		const tableRef = `#root > div > div > .open > div > div:nth-child(2) > table:nth-of-type(${i})`;
-		// const element = await page.$(tableRef);
 
 		const csvHeaders = await getTableHeaderData(tableRef);
-
-		// const tableRowData = await getTableRowData();
-		// const csvRows = await parseTableData1(tableRowData);
-		// await saveTableToCsv(csvHeaders, csvRows);
+		const tableRowData = await getTableRowData(tableRef);
+		const csvRows = await parseTableData(tableRowData);
+		await saveTableToCsv(csvHeaders, csvRows, i);
 	}
-
-	// const csvHeaders = await getTableHeaderData();
-	// const tableRowData = await getTableRowData();
-	// const csvRows = await parseTableData1(tableRowData);
-	// await saveTableToCsv(csvHeaders, csvRows);
 };
 
 exports.saveReport = saveReport;
