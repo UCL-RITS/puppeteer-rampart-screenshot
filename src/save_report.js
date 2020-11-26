@@ -3,7 +3,6 @@ const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 
 const saveReport = async (page, directory, delay) => {
 	const openReportTab = async () => {
-		// click the report button to open the tab
 		const reportButtonElement = await page.$(
 			`#root > div > div > div:nth-child(1) > div.buttons > button`
 		);
@@ -11,25 +10,22 @@ const saveReport = async (page, directory, delay) => {
 			console.log("No report tab was found");
 			return;
 		}
-		await reportButtonElement.click(); // open the report tab
-
-		// wait for the table content to appear in the dom
+		await reportButtonElement.click();
 		await page.waitForSelector(`#root > div > div > .open > div`);
 	};
 
 	const countTables = async () => {
-		const tableData = await page.$$(
+		const tables = await page.$$(
 			`#root > div > div > .open > div > :nth-child(2) > table`
 		);
-		return tableData.length;
+		return tables.length;
 	};
 
 	const getTableName = async (tableRef) => {
-		const tableName = await page.$eval(
+		return await page.$eval(
 			`${tableRef} > caption`,
-			(el) => el.innerText
+			(tableCaption) => tableCaption.innerText
 		);
-		return tableName;
 	};
 
 	const getTableHeaderData = async (tableRef) => {
@@ -37,7 +33,7 @@ const saveReport = async (page, directory, delay) => {
 			const thead = Array.from(
 				document.querySelectorAll(`${tableRef} > thead > tr > th`)
 			);
-			return thead.map((th) => th.innerText);
+			return thead.map((thead) => thead.innerText);
 		}, tableRef);
 
 		// an alternative method to above (more abstract and less clear what it does)
@@ -47,50 +43,45 @@ const saveReport = async (page, directory, delay) => {
 		// );
 
 		// format header data to be inserted into csv
-		const csvHeaders = tableHeadData.map((header, index) => {
+		return tableHeadData.map((header, index) => {
 			return {
 				id: index,
 				title: header,
 			};
 		});
-		return csvHeaders;
 	};
 
 	const getTableRowData = async (tableRef) => {
-		const tableRowData = await page.evaluate((tableRef) => {
+		// returns a tab separated string of row data
+		return await page.evaluate((tableRef) => {
 			const tbody = Array.from(
 				document.querySelectorAll(`${tableRef} > tbody > tr`)
 			);
 			return tbody.map((tr) => tr.innerText);
 		}, tableRef);
-
-		return tableRowData;
 	};
 
 	const parseTableData = async (tableRowData) => {
-		// extract content from each table row
+		// convert each table row data into an array of rowItems
 		const parsedRowData = [];
-		tableRowData.forEach((element) => {
-			const splitRow = element.split("\t");
+		tableRowData.forEach((row) => {
+			const splitRow = row.split("\t");
 			parsedRowData.push(splitRow);
 		});
-		// console.log(parsedRowData);
 
 		const csvRows = [];
 		parsedRowData.map((row) => {
-			let obj = {};
-			row.map((inner, index) => {
-				obj[index] = inner;
+			let rowObject = {};
+			row.map((rowItem, index) => {
+				rowObject[index] = rowItem; // index will be the csv tab number where the rowItem exists
 			});
-			csvRows.push(obj);
+			csvRows.push(rowObject);
 		});
 
-		// console.log(csvRows);
 		return csvRows;
 	};
 
-	const saveTableToCsv = async (tableName, csvHeaders, csvRows, index) => {
-		// write data to csv
+	const writeTableToCsv = async (tableName, csvHeaders, csvRows) => {
 		const csvWriter = createCsvWriter({
 			path: `${directory}/${tableName}.csv`,
 			header: csvHeaders,
@@ -99,11 +90,11 @@ const saveReport = async (page, directory, delay) => {
 		await csvWriter
 			.writeRecords(csvRows)
 			.then(() => {
-				console.log(`saved ${tableName} as .csv`);
+				console.log(`saved '${tableName}' as .csv`);
 			})
 			.catch((error) => {
 				console.log(
-					`something went wrong trying to write report_${index} as .csv`
+					`something went wrong trying to write report '${tableName}' as .csv`
 				);
 				console.error(error);
 			});
@@ -121,7 +112,7 @@ const saveReport = async (page, directory, delay) => {
 		const csvHeaders = await getTableHeaderData(tableRef);
 		const tableRowData = await getTableRowData(tableRef);
 		const csvRows = await parseTableData(tableRowData);
-		await saveTableToCsv(tableName, csvHeaders, csvRows, i);
+		await writeTableToCsv(tableName, csvHeaders, csvRows);
 	}
 };
 

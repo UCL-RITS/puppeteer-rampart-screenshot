@@ -40,7 +40,7 @@ const takeScreenshots = async (page, directory) => {
 				// get the button to open the tab again (else the node detaches on the second attempt)
 				const element = await page.$(tabButtonRef);
 
-				await element.click(); // open the chart tab
+				await element.click();
 				console.log(`chart tab button ${chartTabNameText} clicked`);
 
 				try {
@@ -114,7 +114,6 @@ const takeScreenshots = async (page, directory) => {
 		}
 	};
 
-	// screenshot each tab containing charts
 	const takeTabScreenshots = async (
 		chartTabGroupElements,
 		chartTabGroupNames,
