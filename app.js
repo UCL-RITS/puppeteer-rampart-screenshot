@@ -14,12 +14,13 @@ if (!url) {
 
 const puppeteerConnect = async (url) => {
 	const browser = await puppeteer.launch({
-		// headless: false,
+		headless: false,
 		// slowMo: 250,
 	});
 
 	const page = await browser.newPage();
-	await page.setViewport({ width: 1980, height: 50000 }); // setting large height to account for case where there are many charts
+	// await page.setViewport({ width: 1980, height: 50000 }); // setting large height to account for case where there are many charts
+	// await page.setViewport({ width: 1980, height: 50000, deviceScaleFactor: 1 });
 	page.setDefaultTimeout(10000);
 
 	// minimise the window if running with headless mode as false
@@ -77,7 +78,7 @@ const puppeteerConnect = async (url) => {
 
 	// save the information in the 'reports' tab as a .csv
 	try {
-		await saveReport.saveReport(page, directory, delay);
+		// await saveReport.saveReport(page, directory, delay);
 	} catch (err) {
 		console.log(
 			"\x1b[36m%s\x1b[0m",

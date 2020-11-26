@@ -1,7 +1,8 @@
 const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
+const jimp = require("jimp");
 
-const takeScreenshots = async (page, directory) => {
+const takeScreenshots = async (page, directory, delay) => {
 	const getElementText = async (elementRef) => {
 		// get the name of the current chart tab
 		const elementTextRef = await page.$(elementRef);
@@ -162,11 +163,11 @@ const takeScreenshots = async (page, directory) => {
 	};
 
 	const takeFullpageScreenshot = async (viewport) => {
-		if (viewport.height > page.viewport().height) {
-			console.log(
-				`Viewport too small to fit images on screen. You need to increase the viewport height in app.js line 20. Please set the height larger than ${height}`
-			);
-		}
+		// if (viewport.height > page.viewport().height) {
+		// 	console.log(
+		// 		`Viewport too small to fit images on screen. You need to increase the viewport height in app.js line 20. Please set the height larger than ${height}`
+		// 	);
+		// }
 
 		// await page.screenshot({
 		// 	path: fs.existsSync(`./${directory}/full_page.png`)
@@ -199,6 +200,50 @@ const takeScreenshots = async (page, directory) => {
 		//await page.setViewport({ width: viewport.width, height: viewport.height });
 	};
 
+	const startScrolling = async (chartTabGroupElements, chartTabGroupNames) => {
+		const images = [];
+		await page.hover("#root > div > div > div");
+		const firstImage = await page.screenshot({ path: `test0.png` });
+		images.push(firstImage);
+
+		for (let i = 0; i < chartTabGroupElements.length; i++) {
+			console.log(`scrolling to: ${chartTabGroupNames[i]}, please wait...`);
+			const chartTab = await page.$(chartTabGroupElements[i]);
+
+			// await page.evaluate((selector) => {
+			// 	const scrollableSection = document.querySelector(selector);
+
+			// 	scrollableSection.scrollTop = scrollableSection.offsetHeight;
+			// }, chartTabGroupElements[i]);
+
+			await page.evaluate((_) => {
+				window.scrollBy(0, window.innerHeight);
+			});
+
+			const image = await page.screenshot({ path: `test${i + 1}.png` });
+			images.push(image);
+		}
+		console.log(images);
+
+		let jimps = [];
+		for (let i = 0; i < images.length; i++) {
+			jimps.push(jimp.read(images[i]));
+		}
+
+		Promise.all(jimps)
+			.then((data) => {
+				return Promise.all(jimps);
+			})
+			.then((data) => {
+				data[0].composite(data[1], 0, 100);
+				data[0].composite(data[2], 0, 200);
+
+				data[0].write("final.png", () => {
+					console.log("done");
+				});
+			});
+	};
+
 	const chartTabGroupElements = []; // stores the chart tab dom elements
 	const chartTabGroupNames = []; // stores the name of each chart tab
 	const failedScreenshots = []; // stores the names of any charts that failed to screenshot
@@ -206,14 +251,17 @@ const takeScreenshots = async (page, directory) => {
 	const domElementCount = await countElements();
 	await openChartTabs(domElementCount);
 	await storeChartElementRefs(domElementCount);
-	await takeTabScreenshots(
-		chartTabGroupElements,
-		chartTabGroupNames,
-		failedScreenshots
-	);
-	await takeHeaderScreenshot();
+
+	await startScrolling(chartTabGroupElements, chartTabGroupNames);
+
+	// await takeTabScreenshots(
+	// 	chartTabGroupElements,
+	// 	chartTabGroupNames,
+	// 	failedScreenshots
+	// );
+	// await takeHeaderScreenshot();
 	const viewport = await getViewport();
-	// await setViewport(viewport);
+	await setViewport(viewport);
 	await takeFullpageScreenshot(viewport);
 };
 
