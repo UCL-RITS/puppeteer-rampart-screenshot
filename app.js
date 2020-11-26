@@ -64,7 +64,7 @@ const puppeteerConnect = async (url) => {
 		fs.mkdirSync(directory, { recursive: true });
 	}
 
-	const tempFullPageDir = "./outputs/tempFullPage";
+	const tempFullPageDir = "./outputs/tempImages";
 	if (!fs.existsSync(tempFullPageDir)) {
 		fs.mkdirSync(tempFullPageDir, { recursive: true });
 	}
