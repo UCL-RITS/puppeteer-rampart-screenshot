@@ -1,6 +1,6 @@
 const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
-const jimp = require("jimp");
+const Jimp = require("jimp");
 const mergeImg = require("merge-img");
 
 const takeScreenshots = async (page, directory, delay, tempFullPageDir) => {
@@ -163,7 +163,7 @@ const takeScreenshots = async (page, directory, delay, tempFullPageDir) => {
 		});
 	};
 
-	const pageDown = async () => {
+	const scrollDown = async () => {
 		const isEnd = await page.evaluate(() => {
 			window.scrollBy(0, window.innerHeight);
 			return window.scrollY >= document.body.clientHeight - window.innerHeight;
@@ -172,85 +172,73 @@ const takeScreenshots = async (page, directory, delay, tempFullPageDir) => {
 	};
 
 	const takeFullpageScreenshot = async () => {
-		// if (viewport.height > page.viewport().height) {
-		// 	console.log(
-		// 		`Viewport too small to fit images on screen. You need to increase the viewport height in app.js line 20. Please set the height larger than ${height}`
-		// 	);
-		// }
-
-		// await page.screenshot({
-		// 	path: fs.existsSync(`./${directory}/full_page.png`)
-		// 		? `${directory}/full_page${uuidv4()}.png`
-		// 		: `${directory}/full_page.png`,
-		// 	fullPage: true,
-		// });
-
-		// screenshot the entire page (append unique id to name if it already exists in the directory)
-		// const rootElement = await page.$("#root");
-		// await rootElement.screenshot({
-		// 	path: fs.existsSync(`./${directory}/full_page.png`)
-		// 		? `${directory}/full_page_${uuidv4()}.png`
-		// 		: `${directory}/full_page.png`,
-		// 	omitBackground: true,
-		// });
-
-		const {
-			pagesCount,
-			extraPixels,
-			viewport,
-			clientHeight,
-			innerHeight,
-		} = await page.evaluate(() => {
-			window.scrollTo(0, 0);
-			return {
-				pagesCount: Math.ceil(document.body.clientHeight / window.innerHeight),
-				extraPixels: document.body.clientHeight % window.innerHeight,
-				viewport: {
-					height: window.innerHeight,
-					width: window.innerWidth,
-				},
-				clientHeight: document.body.clientHeight,
-				innerHeight: window.innerHeight,
-			};
-		});
-		console.log(
-			`pages count: ${pagesCount}, \n extra pixels: ${extraPixels}, \n viewport width: ${viewport.width}, viewport height: ${viewport.height}, \n client height: ${clientHeight}, \n inner height: ${innerHeight} `
-		);
-
-		const images = [];
-		for (let i = 0; i < pagesCount; i += 1) {
-			const image = await page.screenshot({
-				path: `./${tempFullPageDir}/test${i}.png`,
+		console.log("\n Taking full page screenshot, please wait...");
+		try {
+			const {
+				pagesCount,
+				extraPixels,
+				viewport,
+				clientHeight,
+				innerHeight,
+			} = await page.evaluate(() => {
+				window.scrollTo(0, 0);
+				return {
+					pagesCount: Math.ceil(
+						document.body.clientHeight / window.innerHeight
+					),
+					extraPixels: document.body.clientHeight % window.innerHeight,
+					viewport: {
+						height: window.innerHeight,
+						width: window.innerWidth,
+					},
+					clientHeight: document.body.clientHeight,
+					innerHeight: window.innerHeight,
+				};
 			});
-			await pageDown();
-			images.push(image);
-		}
+			// console.log(
+			// 	`pages count: ${pagesCount}, \n extra pixels: ${extraPixels}, \n viewport width: ${viewport.width}, viewport height: ${viewport.height}, \n client height: ${clientHeight}, \n inner height: ${innerHeight} `
+			// );
 
-		if (pagesCount === 1) {
-			const image = await jimp.read(images[0]);
-			image.write(`./${directory}/full_page_jimp.png`, () => {
-				console.log("done");
-			});
-			return;
-		}
+			const images = [];
+			for (let i = 0; i < pagesCount; i += 1) {
+				const image = await page.screenshot({
+					path: `./${tempFullPageDir}/temp_${i}.png`,
+				});
+				await scrollDown();
+				images.push(image);
+			}
 
-		// crop the last image so that we can append it to the end of the full page png
-		const cropped = await jimp
-			.read(images.pop())
-			.then((image) =>
-				image.crop(
-					0,
-					viewport.height - extraPixels - 16,
-					viewport.width,
-					extraPixels
+			if (pagesCount === 1) {
+				const image = await Jimp.read(images[0]);
+				image.write(`./${directory}/full_page_screenshot.png`, () => {
+					console.log("successfully took full page screenshot");
+				});
+				return;
+			}
+
+			// crop the last image so that we can append it to the end of the full page png
+			const cropped = await Jimp.read(images.pop())
+				.then((image) =>
+					image.crop(
+						0,
+						viewport.height - extraPixels - 16,
+						viewport.width,
+						extraPixels
+					)
 				)
-			)
-			.then((image) => image.getBufferAsync(jimp.AUTO));
-		images.push(cropped);
-		const mergedImage = await (0, mergeImg)(images, {
-			direction: true,
-		});
-		mergedImage.write(`./${directory}/full_page_jimp.png`);
+				.then((image) => image.getBufferAsync(Jimp.AUTO));
+			images.push(cropped);
+			const mergedImage = await (0, mergeImg)(images, {
+				direction: true,
+			});
+			await mergedImage.write(`./${directory}/full_page_jimp.png`);
+			console.log("successfully took full page screenshot");
+		} catch (err) {
+			console.log(
+				"something went wrong taking the full page screenshot, printing error... \n " +
+					err
+			);
+		}
 	};
 
 	const getViewport = async () => {

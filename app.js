@@ -82,7 +82,7 @@ const puppeteerConnect = async (url) => {
 
 	// save the information in the 'reports' tab as a .csv
 	try {
-		// await saveReport.saveReport(page, directory, delay);
+		await saveReport.saveReport(page, directory, delay);
 	} catch (err) {
 		console.log(
 			"\x1b[36m%s\x1b[0m",
