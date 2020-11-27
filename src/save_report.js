@@ -85,8 +85,8 @@ const saveReport = async (page, directory) => {
 	const writeTableToCsv = async (tableName, csvHeaders, csvRows) => {
 		const csvWriter = createCsvWriter({
 			path: fs.existsSync(`./${directory}/report_${tableName}.csv`)
-				? `${directory}/${tableName}_${uuidv4()}.csv`
-				: `${directory}/${tableName}.csv`,
+				? `${directory}/report_${tableName}_${uuidv4()}.csv`
+				: `${directory}/report_${tableName}.csv`,
 			header: csvHeaders,
 		});
 
