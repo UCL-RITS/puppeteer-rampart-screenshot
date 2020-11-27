@@ -1,5 +1,7 @@
 This application allows users of the RAMPART project [https://github.com/artic-network/rampart](https://github.com/artic-network/rampart) to take automatic screenshots of RAMPART chart outputs using puppeteer https://github.com/puppeteer/puppeteer](https://github.com/puppeteer/puppeteer).
 
+The application will also save the table data in the RAMPART reports tab into separate .csv files.
+
 ---
 
 ## Requirements
@@ -30,6 +32,8 @@ node app.js
 
 The application will then automatically take screenshots of the charts in your active RAMPART session. Screenshots are saved as .png files in the project root under `/outputs`. Depending on how many charts you have in your project, it may take some time to finish taking all of the screenshots. Any screenshots that fail (see below for possible errors) will have "-failed" appended to the filename.
 
+The .csv table data in the RAMPART reports tab will also be saved into the `/outputs` directory.
+
 ---
 
 ## Specifying a custom port
@@ -54,7 +58,7 @@ When no arguments are passed the application will assume your RAMPART project is
 
 There is currently a known chromium bug that is affecting the behaviour of some fullpage screenshots, see here for more information [https://github.com/puppeteer/puppeteer/issues/1576](https://github.com/puppeteer/puppeteer/issues/1576). This seems to affect pages that have a large viewport height and causes the fullpage screenshot to duplicate content.
 
-If you are running into this issue there are currently two options: 1. set headless mode to false (app.js line 17); 2. take the fullpage screenshot manually.
+This application currently uses a workaround to take the fullpage screenshot until the above bug is fixed. This workaround uses Jimp [https://www.npmjs.com/package/jimp](https://www.npmjs.com/package/jimp) to merge several screenshots into a fullpage image.
 
 ---
 

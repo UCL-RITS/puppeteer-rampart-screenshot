@@ -1,4 +1,5 @@
 const fs = require("fs");
+const rimraf = require("rimraf");
 const puppeteer = require("puppeteer");
 const screenshot = require("./src/screenshot");
 const saveReport = require("./src/save_report");
@@ -83,7 +84,11 @@ const puppeteerConnect = async (url) => {
 		console.log(err);
 	}
 
-	console.log("\x1b[36m%s\x1b[0m", "all operations completed");
+	console.log("cleaning up temporary files and folders");
+	await rimraf("./outputs/tempImages", function () {
+		console.log("\x1b[36m%s\x1b[0m", "all operations completed");
+	});
+
 	browser.close();
 };
 
