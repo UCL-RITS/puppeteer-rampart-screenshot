@@ -1,7 +1,8 @@
+const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 
-const saveReport = async (page, directory, delay) => {
+const saveReport = async (page, directory) => {
 	const openReportTab = async () => {
 		const reportButtonElement = await page.$(
 			`#root > div > div > div:nth-child(1) > div.buttons > button`
@@ -83,7 +84,9 @@ const saveReport = async (page, directory, delay) => {
 
 	const writeTableToCsv = async (tableName, csvHeaders, csvRows) => {
 		const csvWriter = createCsvWriter({
-			path: `${directory}/${tableName}.csv`,
+			path: fs.existsSync(`./${directory}/report_${tableName}.csv`)
+				? `${directory}/${tableName}_${uuidv4()}.csv`
+				: `${directory}/${tableName}.csv`,
 			header: csvHeaders,
 		});
 
@@ -94,15 +97,18 @@ const saveReport = async (page, directory, delay) => {
 			})
 			.catch((error) => {
 				console.log(
-					`something went wrong trying to write report '${tableName}' as .csv`
+					`something went wrong trying to write report '${tableName}' as .csv \n${error}`
 				);
-				console.error(error);
 			});
 	};
 
 	// App flow starts here
 	await openReportTab();
 	const tableCount = await countTables();
+	if (tableCount === 0) {
+		console.log("no tables were found");
+		return;
+	}
 
 	// loop through each table and save the data as csv
 	for (let i = 1; i < tableCount + 1; i++) {

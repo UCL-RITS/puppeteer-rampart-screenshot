@@ -3,7 +3,7 @@ const { v4: uuidv4 } = require("uuid");
 const Jimp = require("jimp");
 const mergeImg = require("merge-img");
 
-const takeScreenshots = async (page, directory, delay, tempFullPageDir) => {
+const takeScreenshots = async (page, directory, tempImagesDir) => {
 	const getElementText = async (elementRef) => {
 		// get the name of the current chart tab
 		const elementTextRef = await page.$(elementRef);
@@ -11,7 +11,6 @@ const takeScreenshots = async (page, directory, delay, tempFullPageDir) => {
 			(element) => element.innerHTML,
 			elementTextRef
 		);
-
 		return text;
 	};
 
@@ -41,7 +40,6 @@ const takeScreenshots = async (page, directory, delay, tempFullPageDir) => {
 			const openTabAndWait = async () => {
 				// get the button to open the tab again (else the node detaches on the second attempt)
 				const element = await page.$(tabButtonRef);
-
 				await element.click();
 				console.log(`chart tab button ${chartTabNameText} clicked`);
 
@@ -172,15 +170,9 @@ const takeScreenshots = async (page, directory, delay, tempFullPageDir) => {
 	};
 
 	const takeFullpageScreenshot = async () => {
-		console.log("\n Taking full page screenshot, please wait...");
+		console.log("\nTaking full page screenshot, please wait...");
 		try {
-			const {
-				pagesCount,
-				extraPixels,
-				viewport,
-				clientHeight,
-				innerHeight,
-			} = await page.evaluate(() => {
+			const { pagesCount, extraPixels, viewport } = await page.evaluate(() => {
 				window.scrollTo(0, 0);
 				return {
 					pagesCount: Math.ceil(
@@ -195,14 +187,11 @@ const takeScreenshots = async (page, directory, delay, tempFullPageDir) => {
 					innerHeight: window.innerHeight,
 				};
 			});
-			// console.log(
-			// 	`pages count: ${pagesCount}, \n extra pixels: ${extraPixels}, \n viewport width: ${viewport.width}, viewport height: ${viewport.height}, \n client height: ${clientHeight}, \n inner height: ${innerHeight} `
-			// );
 
 			const images = [];
 			for (let i = 0; i < pagesCount; i += 1) {
 				const image = await page.screenshot({
-					path: `./${tempFullPageDir}/temp_${i}.png`,
+					path: `./${tempImagesDir}/temp_${i}.png`,
 				});
 				await scrollDown();
 				images.push(image);
@@ -210,9 +199,14 @@ const takeScreenshots = async (page, directory, delay, tempFullPageDir) => {
 
 			if (pagesCount === 1) {
 				const image = await Jimp.read(images[0]);
-				image.write(`./${directory}/full_page_screenshot.png`, () => {
-					console.log("successfully took full page screenshot");
-				});
+				image.write(
+					fs.existsSync(`./${directory}/full_page_screenshot.png`)
+						? `${directory}/full_page_screenshot_${uuidv4()}.png`
+						: `${directory}/full_page_screenshot.png`,
+					() => {
+						console.log("successfully took full page screenshot \n");
+					}
+				);
 				return;
 			}
 
@@ -231,8 +225,12 @@ const takeScreenshots = async (page, directory, delay, tempFullPageDir) => {
 			const mergedImage = await (0, mergeImg)(images, {
 				direction: true,
 			});
-			await mergedImage.write(`./${directory}/full_page_jimp.png`);
-			console.log("successfully took full page screenshot");
+			await mergedImage.write(
+				fs.existsSync(`./${directory}/full_page_screenshot.png`)
+					? `${directory}/full_page_screenshot_${uuidv4()}.png`
+					: `${directory}/full_page_screenshot.png`
+			);
+			console.log("successfully took full page screenshot \n");
 		} catch (err) {
 			console.log(
 				"something went wrong taking the full page screenshot, printing error... \n " +
@@ -241,20 +239,7 @@ const takeScreenshots = async (page, directory, delay, tempFullPageDir) => {
 		}
 	};
 
-	const getViewport = async () => {
-		// detect the size of the page when all chart tabs are open so we can take a full page screenshot
-		const rootElement = await page.$("#root");
-		const boundingBox = await rootElement.boundingBox();
-		const { width, height } = boundingBox;
-		return boundingBox;
-	};
-
-	const setViewport = async (viewport) => {
-		console.log(viewport);
-		// commented out setViewport as the chart tabs get closed when changing the viewport size (this is an issue with RAMPART not this app)
-		//await page.setViewport({ width: viewport.width, height: viewport.height });
-	};
-
+	// App flow starts here
 	const chartTabGroupElements = []; // stores the chart tab dom elements
 	const chartTabGroupNames = []; // stores the name of each chart tab
 	const failedScreenshots = []; // stores the names of any charts that failed to screenshot
@@ -269,8 +254,6 @@ const takeScreenshots = async (page, directory, delay, tempFullPageDir) => {
 		failedScreenshots
 	);
 	await takeHeaderScreenshot();
-	const viewport = await getViewport();
-	await setViewport(viewport);
 	await takeFullpageScreenshot();
 };
 

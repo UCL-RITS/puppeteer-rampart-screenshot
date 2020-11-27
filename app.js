@@ -19,16 +19,8 @@ const puppeteerConnect = async (url) => {
 	});
 
 	const page = await browser.newPage();
-	await page.setViewport({ width: 1980, height: 1000 }); // setting large height to account for case where there are many charts
+	await page.setViewport({ width: 1980, height: 1000 });
 	page.setDefaultTimeout(10000);
-
-	// minimise the window if running with headless mode as false
-	// const session = await page.target().createCDPSession();
-	// const { windowId } = await session.send("Browser.getWindowForTarget");
-	// await session.send("Browser.setWindowBounds", {
-	// 	windowId,
-	// 	bounds: { windowState: "minimized" },
-	// });
 
 	try {
 		await page.goto(url, {
@@ -64,14 +56,14 @@ const puppeteerConnect = async (url) => {
 		fs.mkdirSync(directory, { recursive: true });
 	}
 
-	const tempFullPageDir = "./outputs/tempImages";
-	if (!fs.existsSync(tempFullPageDir)) {
-		fs.mkdirSync(tempFullPageDir, { recursive: true });
+	const tempImagesDir = "./outputs/tempImages";
+	if (!fs.existsSync(tempImagesDir)) {
+		fs.mkdirSync(tempImagesDir, { recursive: true });
 	}
 
 	// take screenshots of charts
 	try {
-		await screenshot.takeScreenshots(page, directory, delay, tempFullPageDir);
+		await screenshot.takeScreenshots(page, directory, tempImagesDir);
 	} catch (err) {
 		console.log(
 			"\x1b[36m%s\x1b[0m",
@@ -82,7 +74,7 @@ const puppeteerConnect = async (url) => {
 
 	// save the information in the 'reports' tab as a .csv
 	try {
-		await saveReport.saveReport(page, directory, delay);
+		await saveReport.saveReport(page, directory);
 	} catch (err) {
 		console.log(
 			"\x1b[36m%s\x1b[0m",
@@ -91,6 +83,7 @@ const puppeteerConnect = async (url) => {
 		console.log(err);
 	}
 
+	console.log("\x1b[36m%s\x1b[0m", "all operations completed");
 	browser.close();
 };
 
