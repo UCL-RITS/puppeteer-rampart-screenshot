@@ -3,7 +3,7 @@ const { v4: uuidv4 } = require("uuid");
 const Jimp = require("jimp");
 const mergeImg = require("merge-img");
 
-const takeScreenshots = async (page, directory, tempImagesDir) => {
+const takeScreenshots = async (page, directory, tempImagesDirectory) => {
 	const getElementText = async (elementRef) => {
 		// get the name of the current chart tab
 		const elementTextRef = await page.$(elementRef);
@@ -191,7 +191,7 @@ const takeScreenshots = async (page, directory, tempImagesDir) => {
 			const images = [];
 			for (let i = 0; i < pagesCount; i += 1) {
 				const image = await page.screenshot({
-					path: `./${tempImagesDir}/temp_${i}.png`,
+					path: `./${tempImagesDirectory}/temp_${i}.png`,
 				});
 				await scrollDown();
 				images.push(image);

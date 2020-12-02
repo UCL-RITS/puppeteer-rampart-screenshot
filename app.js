@@ -50,21 +50,27 @@ const puppeteerConnect = async (url) => {
 	let month = dateObject.getMonth() + 1;
 	let year = dateObject.getFullYear();
 
-	const directory = `./outputs/${
+	const imagesDirectory = `./outputs/${
 		year + "-" + month + "-" + date + "-" + timeStamp
 	}`;
-	if (!fs.existsSync(directory)) {
-		fs.mkdirSync(directory, { recursive: true });
+	const reportsDirectory = `${imagesDirectory}/reports`;
+
+	if (!fs.existsSync(reportsDirectory)) {
+		fs.mkdirSync(reportsDirectory, { recursive: true });
 	}
 
-	const tempImagesDir = "./outputs/tempImages";
-	if (!fs.existsSync(tempImagesDir)) {
-		fs.mkdirSync(tempImagesDir, { recursive: true });
+	const tempImagesDirectory = "./outputs/tempImages";
+	if (!fs.existsSync(tempImagesDirectory)) {
+		fs.mkdirSync(tempImagesDirectory, { recursive: true });
 	}
 
 	// take screenshots of charts
 	try {
-		await screenshot.takeScreenshots(page, directory, tempImagesDir);
+		await screenshot.takeScreenshots(
+			page,
+			imagesDirectory,
+			tempImagesDirectory
+		);
 	} catch (err) {
 		console.log(
 			"\x1b[36m%s\x1b[0m",
@@ -75,7 +81,7 @@ const puppeteerConnect = async (url) => {
 
 	// save the information in the 'reports' tab as a .csv
 	try {
-		await saveReport.saveReport(page, directory);
+		await saveReport.saveReport(page, reportsDirectory);
 	} catch (err) {
 		console.log(
 			"\x1b[36m%s\x1b[0m",
@@ -85,7 +91,7 @@ const puppeteerConnect = async (url) => {
 	}
 
 	console.log("cleaning up temporary files and folders");
-	await rimraf("./outputs/tempImages", function () {
+	await rimraf(tempImagesDirectory, function () {
 		console.log("\x1b[36m%s\x1b[0m", "all operations completed");
 	});
 
