@@ -1,10 +1,12 @@
-This project allows users of the RAMPART project [https://github.com/artic-network/rampart](https://github.com/artic-network/rampart) to take automatic screenshots of RAMPART chart outputs.
+This application allows users of the RAMPART project [https://github.com/artic-network/rampart](https://github.com/artic-network/rampart) to take automatic screenshots of RAMPART chart outputs using puppeteer https://github.com/puppeteer/puppeteer](https://github.com/puppeteer/puppeteer).
+
+The application will also save the table data in the RAMPART reports tab into separate .csv files.
 
 ---
 
 ## Requirements
 
-You need to have Node.js installed on your local machine, this is required to handle npm packages.
+You need to have Node.js (at least version 10.18.1) installed on your local machine, this is required to handle npm packages. Note that RAMPART also requires Node.js to be at least version 10 or above so you should be able to rely on the version of Node.js that is already running your rampart project.
 
 https://nodejs.org/en/download/
 
@@ -28,9 +30,9 @@ Once RAMPART is running, navigate to the root of this project and run:
 node app.js
 ```
 
-The application will then automatically take screenshots of the charts in your active RAMPART session. Screenshots are saved as .png files in the project root under `/images`. Depending on how many charts you have in your project, it may take some time to finish taking all of the screenshots.
+The application will then automatically take screenshots of the charts in your active RAMPART session. Screenshots are saved as .png files in the project root under `/outputs`. Depending on how many charts you have in your project, it may take some time to finish taking all of the screenshots. Any screenshots that fail (see below for possible errors) will have "-failed" appended to the filename.
 
-Once the program has started, puppeteer will open a temporary Chrome window to start taking screenshots. The window will automatically close again when the program has finished.
+The .csv table data in the RAMPART reports tab will also be saved into the `/outputs` directory.
 
 ---
 
@@ -52,8 +54,32 @@ When no arguments are passed the application will assume your RAMPART project is
 
 ---
 
-## Additional Project Notes
+## Fullpage screenshot issues
 
-This project uses puppeteer [https://github.com/puppeteer/puppeteer](https://github.com/puppeteer/puppeteer) to programatically interact with the browser.
+There is currently a known chromium bug that is affecting the behaviour of some fullpage screenshots, see here for more information [https://github.com/puppeteer/puppeteer/issues/1576](https://github.com/puppeteer/puppeteer/issues/1576). This seems to affect pages that have a large viewport height and causes the fullpage screenshot to duplicate content.
+
+This application currently uses a workaround to take the fullpage screenshot until the above bug is fixed. This workaround uses Jimp [https://www.npmjs.com/package/jimp](https://www.npmjs.com/package/jimp) to merge several screenshots into a fullpage image.
+
+---
+
+## Timeout error
+
+When running the application, you may occasionally experience this error: "TimeoutError: waiting for selector "[selector]" failed". This could be related to a potential puppeteer bug: [https://github.com/puppeteer/puppeteer/issues/4072](https://github.com/puppeteer/puppeteer/issues/4072).
+
+When this error occurs the application will try to continue taking screenshots of the remaining charts so you will need to take the screenshot of the failed chart manually.
+
+---
+
+## Why does the application sometimes fail to screenshot every chart?
+
+When viewing your image outputs you might occasionally notice that the application did not take a screenshot of every chart, or just took a screenshot of the tab bar containing the chart (in which case the image name will have "-failed" appended). This is related to the above mentioned timeout error [https://github.com/puppeteer/puppeteer/issues/4072](https://github.com/puppeteer/puppeteer/issues/4072). If this happens, try running the application again or take a manual screenshot of the charts that were missed.
+
+Any charts that fail to produce a successful screenshot will have "-failed" appened to the image name in the outputs folder (e.g. Mayinga-failed.png) and you will therefore need to take a screenshot of this image manually.
+
+---
+
+## Compatibility
+
+All features have been tested against Rampart version 1.1.0. This application relies on the structure of the Rampart page being constant, therefore future updates to Rampart may cause errors.
 
 ---

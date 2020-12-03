@@ -1,58 +1,60 @@
-const fs = require("fs");
-const puppeteer = require("puppeteer");
-const screenshot = require("./screenshot/screenshot");
-const saveReport = require("./screenshot/save_report");
+const rimraf = require("rimraf");
+
+const puppeteerConnect = require("./src/puppeteer_connect");
+const createDirectories = require("./src/create_directories");
+const screenshot = require("./src/screenshot");
+const saveReport = require("./src/save_report");
 
 // process arguments
 let url = process.argv[2];
 if (!url) {
 	console.log(
-		"No arguments passed to specify url. Defaulting to http://localhost:3000"
+		"No arguments passed to specify url. Defaulting to http://localhost:3000 \n"
 	);
 	url = "http://localhost:3000";
 }
 
-const puppeteerConnect = async (url) => {
-	const browser = await puppeteer.launch({
-		// headless: false,
-		// slowMo: 250,
-	});
+const runApp = async (url) => {
+	const { browser, page } = await puppeteerConnect.puppeteerConnect(url);
 
-	const page = await browser.newPage();
-	await page.setViewport({ width: 1980, height: 50000 }); // setting large height to account for case where there are many charts
+	const {
+		imagesDirectory,
+		reportsDirectory,
+		tempImagesDirectory,
+	} = await createDirectories.createDirectories();
 
+	// take screenshots of charts
 	try {
-		await page.goto(url, {
-			waitUntil: "networkidle2",
-		});
+		await screenshot.takeScreenshots(
+			page,
+			imagesDirectory,
+			tempImagesDirectory
+		);
 	} catch (err) {
 		console.log(
-			"Having trouple establishing a connection. If you are attempting to connect to localhost try entering the url as your local ip address"
+			"\x1b[36m%s\x1b[0m",
+			" \n Something went wrong taking screenshots. Printing error... \n"
 		);
 		console.log(err);
-		browser.close();
-		return;
 	}
 
-	// get the current date in YYYY-MM-DD format (for creating directories)
-	let timeStamp = Date.now();
-	let dateObject = new Date(timeStamp);
-	let date = dateObject.getDate();
-	let month = dateObject.getMonth() + 1;
-	let year = dateObject.getFullYear();
-
-	const directory = `./outputs/${
-		year + "-" + month + "-" + date + "-" + timeStamp
-	}`;
-	if (!fs.existsSync(directory)) {
-		fs.mkdirSync(directory, { recursive: true });
+	// save the information in the 'reports' tab as a .csv
+	try {
+		await saveReport.saveReport(page, reportsDirectory);
+	} catch (err) {
+		console.log(
+			"\x1b[36m%s\x1b[0m",
+			"Something went wrong saving the chart. Printing error... \n"
+		);
+		console.log(err);
 	}
 
-	await screenshot.takeScreenshots(page, directory);
-	// await saveReport.saveReport(page, directory);
-	console.log("All operations completed");
+	console.log("cleaning up temporary files and folders");
+	await rimraf(tempImagesDirectory, function () {
+		console.log("\x1b[36m%s\x1b[0m", "all operations completed");
+	});
 
 	browser.close();
 };
 
-puppeteerConnect(url);
+runApp(url);
