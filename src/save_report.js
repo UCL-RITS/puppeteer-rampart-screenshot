@@ -102,7 +102,7 @@ const saveReport = async (page, directory) => {
 			});
 	};
 
-	// App flow starts here
+	// module flow starts here
 	await openReportTab();
 	const tableCount = await countTables();
 	if (tableCount === 0) {

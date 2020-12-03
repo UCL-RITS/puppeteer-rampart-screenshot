@@ -78,9 +78,7 @@ const takeScreenshots = async (page, directory, tempImagesDirectory) => {
 			);
 
 			const tabOpened = await openTabAndWait();
-			if (tabOpened === false) {
-				continue;
-			}
+			if (tabOpened === false) continue;
 		}
 	};
 
@@ -239,7 +237,7 @@ const takeScreenshots = async (page, directory, tempImagesDirectory) => {
 		}
 	};
 
-	// App flow starts here
+	// module flow starts here
 	const chartTabGroupElements = []; // stores the chart tab dom elements
 	const chartTabGroupNames = []; // stores the name of each chart tab
 	const failedScreenshots = []; // stores the names of any charts that failed to screenshot
